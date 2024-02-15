@@ -1,5 +1,7 @@
-# SAM based Classification
+# SAM based Classification using Clustering
 
+## Dataset
+For the entire process, `BDD100k` dataset has been used.
 
 
 ## Motivation
@@ -36,7 +38,26 @@ During inference, we send an image to SAM and obtain the `mask-embeddings`. Then
 
 Since no training methods are involved while obtaining `memory-bank` or `mask-embeddings`, we can say this is Training Free. Code can be found in [classification.ipynb](classification.ipynb) notebook.
 
+It is apparent that the final result is not good. It is because of following reasons.
+- Semantic signal in embeddings of SAM not strong enough. Because of this, objects other than vechicles are also getting classified.
+- SAM gives out an overly segemented image w.r.t the task of object segementation. Generally object segmentation is a whole body segementation whereas output of SAM is combination of whole object, part object and subpart object which leads to whole object embeddings, part object embedding(for sake of simplicity, consider part and sub-part as same). And whole object and part object embeddings are not close enough, which can be partially attributed to the first reason.
 
 
-## Dataset
-For the entire process, `BDD100k` dataset has been used.
+### Training an MLP
+Now, if look at the inference pipeline, it is possible to convert this to supervised learning problem with a loss that combines `marginal loss` and `cosine distance`/`cosine similarity` but training any part SAM architecture is something we want to avoid.
+
+So instead, we thought of introducing an MLP that acts as a transformation from SAM feature space to a space where memory bank embeddings, whole embeddings and part embeddings of a particular class are close, amplifying the strength of semantic signal present in the process. 
+
+![Result](git_assets/sam_classification_with_training_output1_resized.png)
+
+Although the result looks good, it needs further improvements. As only one vehicle is detected.  
+
+__Code will be uploaded soon__
+
+### Future Improvements
+
+- Since, we ventured into learning methods, why learn not `memory-bank` itself during training? This provides a better anchors for class.
+- Pruning of classes(street light and street sign).
+- Change dataset from BDD100k to more generic object segmentation dataset like ImageNet. This because of following reasons.
+    - Huge class imbalance. The number of cars in dataset are ~100k whereas that of trains ~100. 
+    - As BDD100k is a dataset that is collected from autonomus driving perspective, all vehicles present are of back-view(of course, very few are of side-view). This may create some problems.
