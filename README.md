@@ -32,7 +32,7 @@ As SAM can take bounding box as prompts and give the segments within bounding bo
 ## Classification
 ### Training Free
 
-![Inference for No Training Free](git_assets/sam_classification_no_training_inference.jpg)
+![Inference for No Training Free](git_assets/without_training_flowchart.png)
 
 During inference, we send an image to SAM and obtain the `mask-embeddings`. Then `cosine-similarity` is calculated between `memory-bank` and `mask-embeddings` and assign the segements based on their similarity scores.
 
@@ -44,6 +44,10 @@ It is apparent that the final result is not good. It is because of following rea
 
 
 ### Training an MLP
+
+![Trained MLP pipeline](git_assets/with_training_flowchart.png)
+
+
 Now, if look at the inference pipeline, it is possible to convert this to supervised learning problem with a loss that combines `marginal loss` and `cosine distance`/`cosine similarity` but training any part SAM architecture is something we want to avoid.
 
 So instead, we thought of introducing an MLP that acts as a transformation from SAM feature space to a space where memory bank embeddings, whole embeddings and part embeddings of a particular class are close, amplifying the strength of semantic signal present in the process. 
